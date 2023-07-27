@@ -8,9 +8,9 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-    Use: "codossium",
-    Short: "Official Codossium terminal client TUI & CLI",
-    Long: "Official Codossium terminal client TUI & CLI",
+    Use: "codosseum",
+    Short: "Official Codosseum terminal client TUI & CLI",
+    Long: "Official Codosseum terminal client TUI & CLI",
 
     Run: func(cmd *cobra.Command, args []string) {
 
