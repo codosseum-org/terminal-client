@@ -2,20 +2,23 @@ package main
 
 // Should also import premade components from https://github.com/charmbracelet/bubbles, as well as https://github.com/charmbracelet/lipgloss for styling.
 import (
-	"fmt"
-	"os"
+	//"fmt"
+	//"os"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/codosseum-org/terminal-client/cmd"
 )
 
 type model struct{}
 
 func main() {
-	p := tea.NewProgram(initialModel())
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error: %v", err)
-		os.Exit(1)
-	}
+    cmd.Execute()
+
+	//p := tea.NewProgram(initialModel())
+	//if _, err := p.Run(); err != nil {
+		//fmt.Printf("Error: %v", err)
+		//os.Exit(1)
+	//}
 }
 
 // Intiialize model
