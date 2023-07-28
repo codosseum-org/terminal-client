@@ -10,7 +10,6 @@ import (
 	"github.com/codosseum-org/terminal-client/tui/upload"
 )
 
-// Must add real uploading logic when the backend is complete!
 func StartTUI(path string) error {
     data, err := getFileContent(path)
 	if err != nil {
@@ -22,6 +21,12 @@ func StartTUI(path string) error {
     if _, err := p.Run(); err != nil {
         return err
     }
+
+    return nil
+}
+
+func UploadCode(code string) error {
+    
 
     return nil
 }

@@ -1,19 +1,21 @@
 package upload
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
+	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/textarea"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/codosseum-org/terminal-client/pkg/api"
 )
 
 type keyMap struct {
 	Upload     key.Binding
 	ChangeMode key.Binding
 	Quit       key.Binding
-    Tab        key.Binding
+	Tab        key.Binding
 }
 
 var (
@@ -30,10 +32,10 @@ var (
 			key.WithKeys("ctrl+c"),
 			key.WithHelp("ctrl+c", "quit"),
 		),
-        Tab: key.NewBinding(
-            key.WithKeys("tab"),
-            key.WithHelp("tab", "tab"),
-        ),
+		Tab: key.NewBinding(
+			key.WithKeys("tab"),
+			key.WithHelp("tab", "tab"),
+		),
 	}
 	normalKeymap = []key.Binding{
 		keys.Upload, keys.ChangeMode, keys.Quit,
@@ -50,7 +52,9 @@ type Model struct {
 	keys     keyMap
 	help     help.Model
 	textarea textarea.Model
+	spinner  spinner.Model
 	ready    bool
+	uploaded bool
 }
 
 func NewModel(data, name, language string) Model {
@@ -60,12 +64,16 @@ func NewModel(data, name, language string) Model {
 	ta.MaxWidth = 0
 	ta.CharLimit = 0
 
+	s := spinner.New()
+	s.Spinner = spinner.MiniDot
+
 	return Model{
 		data:     data,
 		fileName: name,
 		fileLang: language,
 		keys:     keys,
 		help:     help.New(),
+		spinner:  s,
 		textarea: ta,
 	}
 }
@@ -93,7 +101,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if !m.textarea.Focused() {
 			switch {
 			case key.Matches(msg, m.keys.Upload):
-				fmt.Print("Upload logic!")
+				err := api.UploadCode(m.textarea.Value())
+				if err != nil {
+					log.Fatal("Okay yeah this can't even happen right now!")
+				}
+				m.uploaded = true
+                return m, m.spinner.Tick
 			case key.Matches(msg, m.keys.ChangeMode):
 				m.textarea.Focus()
 			case key.Matches(msg, m.keys.Quit):
@@ -103,8 +116,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch {
 			case key.Matches(msg, m.keys.ChangeMode):
 				m.textarea.Blur()
-            case key.Matches(msg, m.keys.Tab):
-                m.textarea.InsertString("   ")
+			case key.Matches(msg, m.keys.Tab):
+				m.textarea.InsertString("   ")
 			case key.Matches(msg, m.keys.Quit):
 				return m, tea.Quit
 			}
@@ -126,6 +139,14 @@ func (m Model) helpView() string {
 }
 
 func (m Model) View() string {
-    fileInfo := "Reviewing " + m.fileName + " | Language: " + m.fileLang
-	return m.textarea.View() + "\n" + fileInfo + "\n" + m.helpView()
+	var s string
+	s += m.textarea.View()
+
+	fileInfo := "Reviewing " + m.fileName + " | Language: " + m.fileLang
+    s += "\n" + fileInfo
+    if m.uploaded {
+        s += " | " + m.spinner.View() + " Uploading (to be done, quit for now!)"
+    }
+    s += "\n" + m.helpView()
+    return s
 }
