@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/codosseum-org/terminal-client/pkg/upload"
 	"github.com/spf13/cobra"
@@ -15,10 +14,9 @@ var uploadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filePath := args[0]
 
-		err := upload.UploadAndValidateFile(filePath)
+		err := upload.StartTUI(filePath)
         if err != nil {
-			fmt.Printf("Error: %v", err)
-            os.Exit(1)
+            log.Fatalf("Error: %v", err)
 		}
 
 	},

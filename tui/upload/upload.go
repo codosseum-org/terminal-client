@@ -13,6 +13,7 @@ type keyMap struct {
 	Upload     key.Binding
 	ChangeMode key.Binding
 	Quit       key.Binding
+    Tab        key.Binding
 }
 
 var (
@@ -29,6 +30,10 @@ var (
 			key.WithKeys("ctrl+c"),
 			key.WithHelp("ctrl+c", "quit"),
 		),
+        Tab: key.NewBinding(
+            key.WithKeys("tab"),
+            key.WithHelp("tab", "tab"),
+        ),
 	}
 	normalKeymap = []key.Binding{
 		keys.Upload, keys.ChangeMode, keys.Quit,
@@ -39,14 +44,16 @@ var (
 )
 
 type Model struct {
-	Data     string
+	data     string
+	fileName string
+	fileLang string
 	keys     keyMap
 	help     help.Model
 	textarea textarea.Model
 	ready    bool
 }
 
-func NewModel(data string) Model {
+func NewModel(data, name, language string) Model {
 	ta := textarea.New()
 	ta.Placeholder = "It's empty here..."
 	ta.MaxHeight = 0
@@ -54,7 +61,9 @@ func NewModel(data string) Model {
 	ta.CharLimit = 0
 
 	return Model{
-		Data:     data,
+		data:     data,
+		fileName: name,
+		fileLang: language,
 		keys:     keys,
 		help:     help.New(),
 		textarea: ta,
@@ -76,9 +85,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.help.Width = msg.Width
 
 		m.textarea.SetWidth(msg.Width)
-		m.textarea.SetHeight(msg.Height - 1)
+		m.textarea.SetHeight(msg.Height - 2)
 		if !m.ready {
-			m.textarea.SetValue(m.Data)
+			m.textarea.SetValue(m.data)
 		}
 	case tea.KeyMsg:
 		if !m.textarea.Focused() {
@@ -94,6 +103,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			switch {
 			case key.Matches(msg, m.keys.ChangeMode):
 				m.textarea.Blur()
+            case key.Matches(msg, m.keys.Tab):
+                m.textarea.InsertString("   ")
 			case key.Matches(msg, m.keys.Quit):
 				return m, tea.Quit
 			}
@@ -107,13 +118,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) helpView() string {
-    if m.textarea.Focused() {
-        return m.help.ShortHelpView(focusedKeymap)
-    } else {
-        return m.help.ShortHelpView(normalKeymap)
-    }
+	if m.textarea.Focused() {
+		return m.help.ShortHelpView(focusedKeymap)
+	} else {
+		return m.help.ShortHelpView(normalKeymap)
+	}
 }
 
 func (m Model) View() string {
-	return m.textarea.View() + "\n" + m.helpView()
+    fileInfo := "Reviewing " + m.fileName + " | Language: " + m.fileLang
+	return m.textarea.View() + "\n" + fileInfo + "\n" + m.helpView()
 }
