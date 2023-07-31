@@ -6,40 +6,33 @@ import (
 	"path/filepath"
 
 	"github.com/BurntSushi/toml"
+	modelconfig "github.com/codosseum-org/terminal-client/internal/model/config"
 )
-
-type Config struct {
-	General GeneralConfig `toml:"general"`
-}
-
-type GeneralConfig struct {
-    URL string `toml:"url"`
-}
 
 var (
-	defaultConfig = Config{
-        General: GeneralConfig{URL: "codosseum-tld.org"},
-    }
+	defaultConfig = modelconfig.Config {
+		General: modelconfig.General{URL: "codosseum-tld.org"},
+	}
 )
 
-func GetConfig() (Config, error) {
+func GetConfig() (modelconfig.Config, error) {
 	configPath, err := GetConfigPath()
 	if err != nil {
-		return Config{}, err
+		return modelconfig.Config{}, err
 	}
 
 	if !DoesConfigExist() {
-		return Config{}, fmt.Errorf("configuration file does not exist")
+		return modelconfig.Config{}, fmt.Errorf("configuration file does not exist")
 	}
 
 	content, err := os.ReadFile(configPath)
 	if err != nil {
-		return Config{}, err
+		return modelconfig.Config{}, err
 	}
 
-	var config Config
+	var config modelconfig.Config
 	if _, err := toml.Decode(string(content), &config); err != nil {
-		return Config{}, err
+		return modelconfig.Config{}, err
 	}
 
 	return config, nil
@@ -83,15 +76,38 @@ func GenerateConfig() error {
 		return err
 	}
 
-    file, err := os.Create(path)
-    if err != nil {
-        return err
-    }
-    defer file.Close()
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
-    if err := toml.NewEncoder(file).Encode(defaultConfig); err != nil {
-        return err
-    }
+	if err := toml.NewEncoder(file).Encode(defaultConfig); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func UpdateConfig(config modelconfig.Config) error {
+	if !DoesConfigExist() {
+		return fmt.Errorf("configuration file does not exist")
+	}
+
+	path, err := GetConfigPath()
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	if err := toml.NewEncoder(file).Encode(config); err != nil {
+		return err
+	}
 
 	return nil
 }

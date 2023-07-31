@@ -3,7 +3,7 @@ package cmd
 import (
 	"log"
 
-	"github.com/codosseum-org/terminal-client/pkg/upload"
+	pkgupload "github.com/codosseum-org/terminal-client/pkg/tui/upload"
 	"github.com/spf13/cobra"
 )
 
@@ -14,7 +14,7 @@ var uploadCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		filePath := args[0]
 
-		err := upload.StartTUI(filePath)
+		err := pkgupload.StartTUI(filePath)
         if err != nil {
             log.Fatalf("Error: %v", err)
 		}
