@@ -6,8 +6,6 @@ import (
 	modelconfig "github.com/codosseum-org/terminal-client/internal/model/config"
 )
 
-var ()
-
 type item struct {
 	title, desc string
 }
@@ -18,6 +16,8 @@ func (i item) FilterValue() string { return i.title }
 
 type Model struct {
 	list list.Model
+    config modelconfig.Config
+    items []list.Item
 }
 
 func (m Model) Init() tea.Cmd {
@@ -41,17 +41,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
+    m.list.SetItems(m.items)
 	return m.list.View()
 }
 
 func NewModel(config modelconfig.Config) Model {
 	items := []list.Item{
 		item{"Host", config.General.URL},
-		item{"Host", config.General.URL},
 	}
 
 	m := Model{
 		list: list.New(items, list.NewDefaultDelegate(), 0, 0),
+        config: config,
+        items: items,
 	}
 	m.list.SetShowHelp(true)
 	m.list.Title = "Settings"
