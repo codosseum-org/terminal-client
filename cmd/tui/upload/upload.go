@@ -106,7 +106,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					log.Fatal("Okay yeah this can't even happen right now!")
 				}
 				m.uploaded = true
-                return m, m.spinner.Tick
+				return m, m.spinner.Tick
 			case key.Matches(msg, m.keys.ChangeMode):
 				m.textarea.Focus()
 			case key.Matches(msg, m.keys.Quit):
@@ -122,6 +122,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, tea.Quit
 			}
 		}
+	default:
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
 	}
 
 	m.textarea, cmd = m.textarea.Update(msg)
@@ -143,10 +147,10 @@ func (m Model) View() string {
 	s += m.textarea.View()
 
 	fileInfo := "Reviewing " + m.fileName + " | Language: " + m.fileLang
-    s += "\n" + fileInfo
-    if m.uploaded {
-        s += " | " + m.spinner.View() + " Uploading (to be done, quit for now!)"
-    }
-    s += "\n" + m.helpView()
-    return s
+	s += "\n" + fileInfo
+	if m.uploaded {
+		s += " | " + m.spinner.View() + " Uploading (to be done, quit for now!)"
+	}
+	s += "\n" + m.helpView()
+	return s
 }
