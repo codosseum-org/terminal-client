@@ -15,9 +15,9 @@ func (i item) Description() string { return i.desc }
 func (i item) FilterValue() string { return i.title }
 
 type Model struct {
-	list list.Model
-    config modelconfig.Config
-    items []list.Item
+	list   list.Model
+	config modelconfig.Config
+	items  []list.Item
 }
 
 func (m Model) Init() tea.Cmd {
@@ -41,19 +41,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m Model) View() string {
-    m.list.SetItems(m.items)
+	m.list.SetItems(m.items)
 	return m.list.View()
 }
 
 func NewModel(config modelconfig.Config) Model {
 	items := []list.Item{
 		item{"Host", config.General.URL},
+		item{"Default Name", config.General.DefaultName},
 	}
 
 	m := Model{
-		list: list.New(items, list.NewDefaultDelegate(), 0, 0),
-        config: config,
-        items: items,
+		list:   list.New(items, list.NewDefaultDelegate(), 0, 0),
+		config: config,
+		items:  items,
 	}
 	m.list.SetShowHelp(true)
 	m.list.Title = "Settings"

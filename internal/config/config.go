@@ -11,7 +11,10 @@ import (
 
 var (
 	defaultConfig = modelconfig.Config {
-		General: modelconfig.General{URL: "codosseum-tld.org"},
+		General: modelconfig.General{
+			URL: "codosseum-tld.org",
+			DefaultName: "username",
+		},
 	}
 )
 

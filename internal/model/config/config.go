@@ -6,4 +6,5 @@ type Config struct {
 
 type General struct {
 	URL string `toml:"url"`
+	DefaultName string `toml:"defaultName"`
 }
